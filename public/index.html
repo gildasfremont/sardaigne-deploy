@@ -67,10 +67,9 @@ table.transport .t-dist{width:120px;color:#666;font-size:12.5px;text-align:right
 table.meals .m-lbl{width:74px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em;color:#999;font-weight:600;padding-top:9px;padding-bottom:9px}
 table.meals .m-name{width:220px;font-weight:500;color:#111;padding-top:9px;padding-bottom:9px}
 table.meals .m-ctx{color:#555;font-size:12.5px;line-height:1.5;padding-top:9px;padding-bottom:9px}
-.moodboard{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.moodboard a{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid #d8d0bb;background:#fdfcf8;color:#222;text-decoration:none;font-size:12px;font-weight:500;letter-spacing:-0.01em;border-radius:2px;transition:background 120ms,border-color 120ms}
-.moodboard a:hover{background:#f5f1e3;border-color:#aaa}
-.moodboard a svg{width:13px;height:13px;flex-shrink:0;color:#888}
+.ig-link{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:6px;color:#aaa;border-radius:3px;vertical-align:-4px;transition:color 120ms,background 120ms;text-decoration:none}
+.ig-link svg{width:13px;height:13px;display:block}
+.ig-link:hover{color:#c97a4a;background:#f5f1e3}
 table.transport tr, table.meals tr{transition:background 120ms}
 table.transport tr:hover, table.meals tr:hover{background:#f5f1e3;cursor:default}
 .pin-highlight .pin-marker, .pin-highlight .pin-icon{transform:scale(1.7);box-shadow:0 0 0 5px rgba(255,200,0,0.45),0 2px 6px rgba(0,0,0,0.5)}
@@ -407,26 +406,56 @@ function markFor(color){
   return `<span class="row-dot" style="background:${color}"></span>`;
 }
 
-const MOODBOARD = {
-  1: [['Porto Liscia','portoliscia']],
-  2: [['Cala Spalmatore','calaspalmatore'],['Bassa Trinita','bassatrinita'],['La Maddalena','lamaddalena']],
-  3: [['Capo Testa','capotesta'],['Rena di Levante','renadilevante'],['Li Cossi','licossi'],['Costa Paradiso','costaparadiso']],
-  4: [['Spiaggia delle Bombarde','spiaggiadellebombarde'],['Alghero','alghero']],
-  5: [['Cane Malu','canemalu'],['Bosa','bosa']],
-  6: [['Pittulongu','pittulongu']]
-};
 const IG_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"/></svg>';
+const IG_OVERRIDES = {
+  'olb aéroport':'aeroportoolbia','olb':'aeroportoolbia','atterrissage olb':'aeroportoolbia',
+  'b&b + trattoria gallura':'trattoriagallura','centre intra-muros':'algheroitalia',
+  'sandwich dans le train':null,'apéritif lu salconi':'lusalconi','repas avion':null,
+  'pique-nique cala spalmatore':'calaspalmatore','café sur les bastioni':'algheroitalia',
+  'café corso umberto':'olbia','sebadas et pâtisseries':'sebadas','pasticceria pinna':'pasticceriapinna',
+  'mandras lentas, intra-muros':'mandraslentas','da gianni ou trattoria palau':'palausardegna',
+  'da robertino, palau':'palausardegna','da gianni, santa teresa':'santateresagallura',
+  'trattoria santa teresa':'santateresagallura','la lepanto, alghero':'algheroitalia',
+  'sa nassa / borgo sant\'ignazio (bosa)':'bosa','trattoria gallura, olbia':'trattoriagallura',
+  'déjeuner intra-muros':'algheroitalia','bombarde · fin d\'après-midi':'spiaggiadellebombarde',
+  'pittulongu (optionnel)':'pittulongu','spalmatore + bassa trinita':'calaspalmatore',
+  'rena di levante · li cossi':'licossi','porto liscia · 14h-16h45':'portoliscia',
+  'cane malu, bosa':'canemalu','b&b centre':'olbia',
+  'retour voiture':null,'pickup voiture alghero':'algheroitalia','contrôles olb':null,
+  'matinée libre alghero':'algheroitalia','déjeuner palau, port':'palausardegna',
+  'café avion':null,'petit-déj lu salconi':'lusalconi','vol retour':null,
+  'arrêt belvédère capo marargiu':'capomarargiu','bosa, sa costa et déjeuner':'bosa',
+  'cane malu → alghero':'algheroitalia','bosa → cane malu':'canemalu',
+  'centre → olb aéroport':'aeroportoolbia','olbia terranova → b&b centre':'olbia',
+  'gare alghero → loueur':'algheroitalia','spiaggia bombarde':'spiaggiadellebombarde'
+};
+const IG_STOPWORDS = new Set(['matin','midi','soir','baignade','dormir','—','-','sur','place']);
 
-function injectMoodboards(){
-  document.querySelectorAll('section.day').forEach((section, idx) => {
-    const dayNum = idx + 1;
-    const items = MOODBOARD[dayNum];
-    if (!items) return;
-    const content = section.querySelector('.day-content');
-    if (!content) return;
-    const links = items.map(([label, tag]) => `<a href="https://www.instagram.com/explore/tags/${tag}/" target="_blank" rel="noopener">${IG_ICON}${label}</a>`).join('');
-    content.insertAdjacentHTML('beforeend', `<div class="block-head" style="margin-top:18px"><span class="block-lbl">Moodboard Instagram</span></div><div class="moodboard">${links}</div>`);
-  });
+function slugifyIG(text){
+  return text.normalize('NFD').replace(/[\̀-\ͯ]/g,'')
+    .replace(/[·,()].*/,'').replace(/→.*/,'')
+    .replace(/\s+\d{1,2}h.*/,'').trim().toLowerCase()
+    .replace(/[^a-z0-9]/g,'');
+}
+
+function igTagFor(text){
+  if (!text) return null;
+  const norm = text.toLowerCase().trim();
+  if (norm in IG_OVERRIDES) return IG_OVERRIDES[norm];
+  if (IG_STOPWORDS.has(norm)) return null;
+  // Take destination if arrow
+  let base = text;
+  if (text.includes('→')) base = text.split('→').pop();
+  const slug = slugifyIG(base);
+  if (slug.length < 4 || slug.length > 30) return null;
+  if (/^(le|la|les|un|une|de|du|des|et|ou)$/.test(slug)) return null;
+  return slug;
+}
+
+function igHtml(text){
+  const tag = igTagFor(text);
+  if (!tag) return '';
+  return `<a class="ig-link" href="https://www.instagram.com/explore/tags/${tag}/" target="_blank" rel="noopener" title="#${tag}">${IG_ICON}</a>`;
 }
 
 function injectDots(){
@@ -436,6 +465,8 @@ function injectDots(){
     const color = dotFor(where.textContent);
     const td = tr.querySelector('.t-time');
     if (td) td.insertAdjacentHTML('afterbegin', markFor(color));
+    const ig = igHtml(where.textContent);
+    if (ig) where.insertAdjacentHTML('beforeend', ig);
   });
   document.querySelectorAll('table.meals tr').forEach(tr => {
     let color = '#c97a4a';
@@ -445,6 +476,10 @@ function injectDots(){
     if (name && /^—$|^-$/.test(name.textContent.trim())) return;
     const td = tr.querySelector('.m-lbl');
     if (td) td.insertAdjacentHTML('afterbegin', markFor(color));
+    if (name) {
+      const ig = igHtml(name.textContent);
+      if (ig) name.insertAdjacentHTML('beforeend', ig);
+    }
   });
 }
 
@@ -454,7 +489,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initLocal(`map-loc-${d.num}`, d.pins, d.num);
   });
   injectDots();
-  injectMoodboards();
   document.querySelectorAll('section.day').forEach((section, idx) => {
     const dayNum = idx + 1;
     section.querySelectorAll('table.transport tr, table.meals tr').forEach(tr => {
