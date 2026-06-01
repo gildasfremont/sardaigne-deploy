@@ -31,6 +31,8 @@ h1 .arrow{font-weight:300;color:#888;margin:0 6px}
 .legend .lg-head{font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em;color:#999;font-weight:600}
 .legend .lg-pins{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .legend .lg-dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1.5px solid white;box-shadow:0 0 0 1px rgba(0,0,0,0.15);margin-right:4px;vertical-align:-1px}
+.row-dot{display:inline-block;width:9px;height:9px;border-radius:50%;border:1.5px solid white;box-shadow:0 0 0 1px rgba(0,0,0,0.18);margin-right:8px;vertical-align:-1px;flex-shrink:0}
+table.transport .t-time, table.meals .m-lbl{white-space:nowrap}
 
 .day{border:1px solid #d8d0bb;background:#fdfcf8;margin-bottom:24px;padding:0}
 .day-head{display:grid;grid-template-columns:88px 1fr;align-items:center;padding:16px 22px 14px;border-bottom:1px solid #efe9d8;gap:18px;background:#f5f4ef}
@@ -340,11 +342,41 @@ function initLocal(id, pins) {
   });
 }
 
+function dotFor(text){
+  const t = text.toLowerCase();
+  if (/atterrissage|vol retour|contr[oô]les|aéroport|olb a[ée]roport|départ|arrivée/.test(t)) return '#222';
+  if (/d[ée]jeuner|d[îi]ner|café|petit-d[ée]j|sandwich|repas|pasticceria|pique-nique|apéritif|trattoria/.test(t)) return '#c97a4a';
+  if (/baignade|plage|spalmatore|bombarde|liscia|cane malu|cala|pittulongu|costa paradiso|capo testa|li cossi|rena di levante/.test(t)) return '#3b6ea5';
+  if (/dormir|lu salconi|b&b|nuit|alghero · nuit|olbia centre · nuit/.test(t)) return '#7a8b3c';
+  if (/belvédère|capo marargiu|sa costa|matinée libre|caprera|bastioni/.test(t)) return '#a8804c';
+  return '#888';
+}
+
+function injectDots(){
+  document.querySelectorAll('table.transport tr').forEach(tr => {
+    const where = tr.querySelector('.t-where');
+    if (!where) return;
+    const color = dotFor(where.textContent);
+    const td = tr.querySelector('.t-time');
+    if (td) td.insertAdjacentHTML('afterbegin', `<span class="row-dot" style="background:${color}"></span>`);
+  });
+  document.querySelectorAll('table.meals tr').forEach(tr => {
+    let color = '#c97a4a';
+    if (tr.classList.contains('k-baignade')) color = '#3b6ea5';
+    else if (tr.classList.contains('k-dormir')) color = '#7a8b3c';
+    const name = tr.querySelector('.m-name');
+    if (name && /^—$|^-$/.test(name.textContent.trim())) return;
+    const td = tr.querySelector('.m-lbl');
+    if (td) td.insertAdjacentHTML('afterbegin', `<span class="row-dot" style="background:${color}"></span>`);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   DAYS_DATA.forEach(d => {
     initRegional(`map-reg-${d.num}`, d.zones, d.arrows || []);
     initLocal(`map-loc-${d.num}`, d.pins);
   });
+  injectDots();
 });
 </script>
 </body>
