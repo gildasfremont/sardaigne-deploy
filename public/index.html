@@ -479,7 +479,7 @@ function openIgDrawer(q){
     drawer = document.createElement('aside');
     drawer.id = 'ig-drawer';
     drawer.className = 'ig-drawer';
-    drawer.innerHTML = `<header><span class="ig-title" id="ig-tag-name"></span><div class="ig-actions"><a id="ig-open-real" target="_blank" rel="noopener">Google ↗</a><a id="ig-open-maps" target="_blank" rel="noopener">Maps ↗</a><button class="ig-close" aria-label="Fermer">×</button></div></header><iframe id="ig-frame" referrerpolicy="no-referrer"></iframe>`;
+    drawer.innerHTML = `<header><span class="ig-title" id="ig-tag-name"></span><div class="ig-actions"><a id="ig-open-maps" target="_blank" rel="noopener">Maps ↗</a><a id="ig-open-real" target="_blank" rel="noopener">Photos ↗</a><button class="ig-close" aria-label="Fermer">×</button></div></header><iframe id="ig-frame" referrerpolicy="no-referrer"></iframe>`;
     document.body.appendChild(drawer);
     drawer.querySelector('.ig-close').addEventListener('click', closeIgDrawer);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeIgDrawer(); });
@@ -488,7 +488,7 @@ function openIgDrawer(q){
   drawer.querySelector('#ig-tag-name').textContent = q;
   drawer.querySelector('#ig-open-real').href = `https://www.google.com/search?q=${enc}&tbm=isch`;
   drawer.querySelector('#ig-open-maps').href = `https://www.google.com/maps/search/${enc}`;
-  drawer.querySelector('#ig-frame').src = `https://www.bing.com/images/search?q=${enc}&form=HDRSC2`;
+  drawer.querySelector('#ig-frame').src = `https://maps.google.com/maps?q=${enc}&output=embed&z=13`;
   drawer.classList.add('open');
   overlay.classList.add('open');
 }
