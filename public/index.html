@@ -69,9 +69,11 @@ table.meals .m-name{width:220px;font-weight:500;color:#111;padding-top:9px;paddi
 table.meals .m-ctx{color:#555;font-size:12.5px;line-height:1.5;padding-top:9px;padding-bottom:9px}
 table.transport tr, table.meals tr{transition:background 120ms}
 table.transport tr:hover, table.meals tr:hover{background:#f5f1e3;cursor:default}
-.pin-highlight .pin-marker{transform:scale(1.9);box-shadow:0 0 0 5px rgba(255,200,0,0.45),0 2px 6px rgba(0,0,0,0.5)}
+.pin-highlight .pin-marker, .pin-highlight .pin-icon{transform:scale(1.7);box-shadow:0 0 0 5px rgba(255,200,0,0.45),0 2px 6px rgba(0,0,0,0.5)}
 .pin-highlight{z-index:1000 !important}
-.pin-marker{transition:transform 140ms, box-shadow 140ms}
+.pin-marker, .pin-icon{transition:transform 140ms, box-shadow 140ms}
+.pin-icon{width:20px;height:20px;border-radius:50%;background:#fdfcf8;border:1.5px solid;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,0.35)}
+.pin-icon svg{width:13px;height:13px;display:block}
 
 .footer{margin-top:48px;padding-top:24px;border-top:1px solid #111;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;font-size:13px;color:#555;position:relative}
 .footer h3{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#111;font-weight:500;margin-bottom:8px}
@@ -340,13 +342,20 @@ function initLocal(id, pins, dayNum) {
 
   const arr = [];
   pins.forEach(p => {
+    let html, size, anchor, off;
+    if (p.color === '#3b6ea5') {
+      html = `<div class="pin-icon" style="border-color:${p.color}"><svg viewBox="0 0 20 20" fill="none" stroke="${p.color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8c2-2 4-2 6 0s4 2 6 0 4-2 4 0"/><path d="M2 13c2-2 4-2 6 0s4 2 6 0 4-2 4 0"/></svg></div>`;
+      size = [20, 20]; anchor = [10, 10]; off = [12, 0];
+    } else if (p.color === '#c97a4a') {
+      html = `<div class="pin-icon" style="border-color:${p.color}"><svg viewBox="0 0 24 24" fill="none" stroke="${p.color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V2"/><path d="M5 11v11"/><path d="M19 2v20"/><path d="M19 10c-2 0-3-1.5-3-4 0-2.2 1.2-4 3-4"/></svg></div>`;
+      size = [20, 20]; anchor = [10, 10]; off = [12, 0];
+    } else {
+      html = `<div class="pin-marker" style="background:${p.color}"></div>`;
+      size = [14, 14]; anchor = [7, 7]; off = [10, 0];
+    }
     const marker = L.marker([p.lat, p.lon], {
-      icon: L.divIcon({
-        className: '',
-        html: `<div class="pin-marker" style="background:${p.color}"></div>`,
-        iconSize: [14, 14], iconAnchor: [7, 7]
-      })
-    }).addTo(map).bindTooltip(p.label, {permanent: true, direction: 'right', offset: [10, 0], className: 'pin-label'});
+      icon: L.divIcon({ className: '', html, iconSize: size, iconAnchor: anchor })
+    }).addTo(map).bindTooltip(p.label, {permanent: true, direction: 'right', offset: off, className: 'pin-label'});
     arr.push({label: p.label, marker});
   });
   DAY_MARKERS[dayNum] = arr;
