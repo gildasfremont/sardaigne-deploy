@@ -67,9 +67,21 @@ table.transport .t-dist{width:120px;color:#666;font-size:12.5px;text-align:right
 table.meals .m-lbl{width:74px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em;color:#999;font-weight:600;padding-top:9px;padding-bottom:9px}
 table.meals .m-name{width:220px;font-weight:500;color:#111;padding-top:9px;padding-bottom:9px}
 table.meals .m-ctx{color:#555;font-size:12.5px;line-height:1.5;padding-top:9px;padding-bottom:9px}
-.ig-link{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:6px;color:#aaa;border-radius:3px;vertical-align:-4px;transition:color 120ms,background 120ms;text-decoration:none}
+.ig-link{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:6px;color:#aaa;border-radius:3px;vertical-align:-4px;transition:color 120ms,background 120ms;text-decoration:none;cursor:pointer}
 .ig-link svg{width:13px;height:13px;display:block}
 .ig-link:hover{color:#c97a4a;background:#f5f1e3}
+.ig-drawer{position:fixed;top:0;right:0;width:min(440px,92vw);height:100vh;background:#fdfcf8;border-left:1px solid #d8d0bb;box-shadow:-2px 0 16px rgba(0,0,0,0.08);transform:translateX(100%);transition:transform 220ms ease;z-index:9999;display:flex;flex-direction:column}
+.ig-drawer.open{transform:translateX(0)}
+.ig-drawer header{padding:14px 18px;border-bottom:1px solid #d8d0bb;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#f5f4ef}
+.ig-drawer header .ig-title{font-family:'Inter Tight';font-size:14px;font-weight:600;letter-spacing:-0.01em}
+.ig-drawer header .ig-actions{display:flex;align-items:center;gap:10px}
+.ig-drawer header a{font-size:11.5px;color:#666;text-decoration:none;border:1px solid #d8d0bb;padding:4px 8px;border-radius:2px}
+.ig-drawer header a:hover{background:white;color:#111}
+.ig-drawer .ig-close{background:none;border:none;font-size:22px;line-height:1;cursor:pointer;color:#888;padding:0 4px}
+.ig-drawer .ig-close:hover{color:#111}
+.ig-drawer iframe{flex:1;width:100%;border:none;background:#f5f4ef}
+.ig-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.25);opacity:0;pointer-events:none;transition:opacity 220ms;z-index:9998}
+.ig-overlay.open{opacity:1;pointer-events:auto}
 table.transport tr, table.meals tr{transition:background 120ms}
 table.transport tr:hover, table.meals tr:hover{background:#f5f1e3;cursor:default}
 .pin-highlight .pin-marker, .pin-highlight .pin-icon{transform:scale(1.7);box-shadow:0 0 0 5px rgba(255,200,0,0.45),0 2px 6px rgba(0,0,0,0.5)}
@@ -455,8 +467,45 @@ function igTagFor(text){
 function igHtml(text){
   const tag = igTagFor(text);
   if (!tag) return '';
-  return `<a class="ig-link" href="https://www.instagram.com/explore/tags/${tag}/" target="_blank" rel="noopener" title="#${tag}">${IG_ICON}</a>`;
+  return `<a class="ig-link" data-ig-tag="${tag}" href="https://www.instagram.com/explore/tags/${tag}/" target="_blank" rel="noopener" title="#${tag}">${IG_ICON}</a>`;
 }
+
+function openIgDrawer(tag){
+  let drawer = document.getElementById('ig-drawer');
+  let overlay = document.getElementById('ig-overlay');
+  if (!drawer){
+    overlay = document.createElement('div');
+    overlay.id = 'ig-overlay';
+    overlay.className = 'ig-overlay';
+    overlay.addEventListener('click', closeIgDrawer);
+    document.body.appendChild(overlay);
+    drawer = document.createElement('aside');
+    drawer.id = 'ig-drawer';
+    drawer.className = 'ig-drawer';
+    drawer.innerHTML = `<header><span class="ig-title">#<span id="ig-tag-name"></span></span><div class="ig-actions"><a id="ig-open-real" target="_blank" rel="noopener">Ouvrir Instagram ↗</a><button class="ig-close" aria-label="Fermer">×</button></div></header><iframe id="ig-frame" referrerpolicy="no-referrer"></iframe>`;
+    document.body.appendChild(drawer);
+    drawer.querySelector('.ig-close').addEventListener('click', closeIgDrawer);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeIgDrawer(); });
+  }
+  drawer.querySelector('#ig-tag-name').textContent = tag;
+  drawer.querySelector('#ig-open-real').href = `https://www.instagram.com/explore/tags/${tag}/`;
+  drawer.querySelector('#ig-frame').src = `https://www.picuki.com/tag/${tag}`;
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+}
+
+function closeIgDrawer(){
+  document.getElementById('ig-drawer')?.classList.remove('open');
+  document.getElementById('ig-overlay')?.classList.remove('open');
+  const f = document.getElementById('ig-frame'); if (f) f.src = 'about:blank';
+}
+
+document.addEventListener('click', e => {
+  const link = e.target.closest('.ig-link');
+  if (!link) return;
+  e.preventDefault();
+  openIgDrawer(link.dataset.igTag);
+});
 
 function injectDots(){
   document.querySelectorAll('table.transport tr').forEach(tr => {
