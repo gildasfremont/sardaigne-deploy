@@ -32,6 +32,8 @@ h1 .arrow{font-weight:300;color:#888;margin:0 6px}
 .legend .lg-pins{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .legend .lg-dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1.5px solid white;box-shadow:0 0 0 1px rgba(0,0,0,0.15);margin-right:4px;vertical-align:-1px}
 .row-dot{display:inline-block;width:9px;height:9px;border-radius:50%;border:1.5px solid white;box-shadow:0 0 0 1px rgba(0,0,0,0.18);margin-right:8px;vertical-align:-1px;flex-shrink:0}
+.row-ico{display:inline-block;width:13px;height:13px;margin-right:6px;vertical-align:-3px;flex-shrink:0}
+.lg-ico{display:inline-block;width:14px;height:14px;margin-right:4px;vertical-align:-3px}
 table.transport .t-time, table.meals .m-lbl{white-space:nowrap}
 
 .day{border:1px solid #d8d0bb;background:#fdfcf8;margin-bottom:24px;padding:0}
@@ -114,8 +116,8 @@ table.transport tr:hover, table.meals tr:hover{background:#f5f1e3;cursor:default
   <div class="lg-head">Légende des pins</div>
   <div class="lg-pins">
     <span class="lg-dot" style="background:#7a8b3c"></span>Dormir
-    <span class="lg-dot" style="background:#3b6ea5"></span>Baignade
-    <span class="lg-dot" style="background:#c97a4a"></span>Repas
+    <svg class="lg-ico" viewBox="0 0 20 20" fill="none" stroke="#3b6ea5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8c2-2 4-2 6 0s4 2 6 0 4-2 4 0"/><path d="M2 13c2-2 4-2 6 0s4 2 6 0 4-2 4 0"/></svg>Baignade
+    <svg class="lg-ico" viewBox="0 0 24 24" fill="none" stroke="#c97a4a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V2"/><path d="M5 11v11"/><path d="M19 2v20"/><path d="M19 10c-2 0-3-1.5-3-4 0-2.2 1.2-4 3-4"/></svg>Repas
     <span class="lg-dot" style="background:#a8804c"></span>Étape paysagère
     <span class="lg-dot" style="background:#888"></span>Transit
     <span class="lg-dot" style="background:#222"></span>Départ / arrivée
@@ -383,13 +385,22 @@ function dotFor(text){
   return '#888';
 }
 
+const ICO_SEA = '<svg class="row-ico" viewBox="0 0 20 20" fill="none" stroke="#3b6ea5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8c2-2 4-2 6 0s4 2 6 0 4-2 4 0"/><path d="M2 13c2-2 4-2 6 0s4 2 6 0 4-2 4 0"/></svg>';
+const ICO_FORK = '<svg class="row-ico" viewBox="0 0 24 24" fill="none" stroke="#c97a4a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V2"/><path d="M5 11v11"/><path d="M19 2v20"/><path d="M19 10c-2 0-3-1.5-3-4 0-2.2 1.2-4 3-4"/></svg>';
+
+function markFor(color){
+  if (color === '#3b6ea5') return ICO_SEA;
+  if (color === '#c97a4a') return ICO_FORK;
+  return `<span class="row-dot" style="background:${color}"></span>`;
+}
+
 function injectDots(){
   document.querySelectorAll('table.transport tr').forEach(tr => {
     const where = tr.querySelector('.t-where');
     if (!where) return;
     const color = dotFor(where.textContent);
     const td = tr.querySelector('.t-time');
-    if (td) td.insertAdjacentHTML('afterbegin', `<span class="row-dot" style="background:${color}"></span>`);
+    if (td) td.insertAdjacentHTML('afterbegin', markFor(color));
   });
   document.querySelectorAll('table.meals tr').forEach(tr => {
     let color = '#c97a4a';
@@ -398,7 +409,7 @@ function injectDots(){
     const name = tr.querySelector('.m-name');
     if (name && /^—$|^-$/.test(name.textContent.trim())) return;
     const td = tr.querySelector('.m-lbl');
-    if (td) td.insertAdjacentHTML('afterbegin', `<span class="row-dot" style="background:${color}"></span>`);
+    if (td) td.insertAdjacentHTML('afterbegin', markFor(color));
   });
 }
 
