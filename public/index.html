@@ -291,7 +291,7 @@ const VOYAGER  = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/
 function initRegional(id, zones, arrows) {
   const el = document.getElementById(id);
   if (!el) return;
-  const map = L.map(el, STATIC_OPTS);
+  const map = L.map(el, {zoomControl:true, scrollWheelZoom:false, dragging:true, doubleClickZoom:true, touchZoom:true, boxZoom:true, keyboard:true, attributionControl:false});
   L.tileLayer(POSITRON, {subdomains:'abcd', maxZoom:19}).addTo(map);
   map.fitBounds(SARDINIA_BOUNDS, {padding:[2,2]});
 
