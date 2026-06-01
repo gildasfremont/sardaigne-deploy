@@ -482,14 +482,14 @@ function openIgDrawer(tag){
     drawer = document.createElement('aside');
     drawer.id = 'ig-drawer';
     drawer.className = 'ig-drawer';
-    drawer.innerHTML = `<header><span class="ig-title">#<span id="ig-tag-name"></span></span><div class="ig-actions"><a id="ig-open-real" target="_blank" rel="noopener">Ouvrir Instagram ↗</a><button class="ig-close" aria-label="Fermer">×</button></div></header><iframe id="ig-frame" referrerpolicy="no-referrer"></iframe>`;
+    drawer.innerHTML = `<header><span class="ig-title"><span id="ig-tag-name"></span></span><div class="ig-actions"><a id="ig-open-real" target="_blank" rel="noopener">Instagram ↗</a><button class="ig-close" aria-label="Fermer">×</button></div></header><iframe id="ig-frame" referrerpolicy="no-referrer"></iframe>`;
     document.body.appendChild(drawer);
     drawer.querySelector('.ig-close').addEventListener('click', closeIgDrawer);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeIgDrawer(); });
   }
   drawer.querySelector('#ig-tag-name').textContent = tag;
   drawer.querySelector('#ig-open-real').href = `https://www.instagram.com/explore/tags/${tag}/`;
-  drawer.querySelector('#ig-frame').src = `https://www.picuki.com/tag/${tag}`;
+  drawer.querySelector('#ig-frame').src = `https://www.bing.com/images/search?q=${encodeURIComponent(tag)}&form=HDRSC2`;
   drawer.classList.add('open');
   overlay.classList.add('open');
 }
