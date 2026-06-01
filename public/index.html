@@ -418,7 +418,7 @@ function markFor(color){
   return `<span class="row-dot" style="background:${color}"></span>`;
 }
 
-const IG_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"/></svg>';
+const IG_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3l2-3h8l2 3h3v13H3z"/><circle cx="12" cy="13" r="4"/></svg>';
 const IG_OVERRIDES = {
   'olb aéroport':'Aeroporto Olbia Costa Smeralda','olb':'Aeroporto Olbia Costa Smeralda','atterrissage olb':'Aeroporto Olbia Costa Smeralda',
   'b&b + trattoria gallura':'Trattoria Gallura Olbia','centre intra-muros':'Alghero centro storico',
@@ -464,7 +464,7 @@ function igHtml(text){
   const q = igTagFor(text);
   if (!q) return '';
   const enc = encodeURIComponent(q);
-  return `<a class="ig-link" data-ig-q="${q.replace(/"/g,'&quot;')}" href="https://www.instagram.com/explore/search/keyword/?q=${enc}" target="_blank" rel="noopener" title="${q}">${IG_ICON}</a>`;
+  return `<a class="ig-link" data-ig-q="${q.replace(/"/g,'&quot;')}" href="https://www.google.com/search?q=${enc}&tbm=isch" target="_blank" rel="noopener" title="Photos · ${q}">${IG_ICON}</a>`;
 }
 
 function openIgDrawer(q){
@@ -479,14 +479,15 @@ function openIgDrawer(q){
     drawer = document.createElement('aside');
     drawer.id = 'ig-drawer';
     drawer.className = 'ig-drawer';
-    drawer.innerHTML = `<header><span class="ig-title" id="ig-tag-name"></span><div class="ig-actions"><a id="ig-open-real" target="_blank" rel="noopener">Instagram ↗</a><button class="ig-close" aria-label="Fermer">×</button></div></header><iframe id="ig-frame" referrerpolicy="no-referrer"></iframe>`;
+    drawer.innerHTML = `<header><span class="ig-title" id="ig-tag-name"></span><div class="ig-actions"><a id="ig-open-real" target="_blank" rel="noopener">Google ↗</a><a id="ig-open-maps" target="_blank" rel="noopener">Maps ↗</a><button class="ig-close" aria-label="Fermer">×</button></div></header><iframe id="ig-frame" referrerpolicy="no-referrer"></iframe>`;
     document.body.appendChild(drawer);
     drawer.querySelector('.ig-close').addEventListener('click', closeIgDrawer);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeIgDrawer(); });
   }
   const enc = encodeURIComponent(q);
   drawer.querySelector('#ig-tag-name').textContent = q;
-  drawer.querySelector('#ig-open-real').href = `https://www.instagram.com/explore/search/keyword/?q=${enc}`;
+  drawer.querySelector('#ig-open-real').href = `https://www.google.com/search?q=${enc}&tbm=isch`;
+  drawer.querySelector('#ig-open-maps').href = `https://www.google.com/maps/search/${enc}`;
   drawer.querySelector('#ig-frame').src = `https://www.bing.com/images/search?q=${enc}&form=HDRSC2`;
   drawer.classList.add('open');
   overlay.classList.add('open');
