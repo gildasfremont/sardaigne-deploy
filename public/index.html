@@ -420,34 +420,33 @@ function markFor(color){
 
 const IG_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"/></svg>';
 const IG_OVERRIDES = {
-  'olb aéroport':'aeroportoolbia','olb':'aeroportoolbia','atterrissage olb':'aeroportoolbia',
-  'b&b + trattoria gallura':'trattoriagallura','centre intra-muros':'algheroitalia',
-  'sandwich dans le train':null,'apéritif lu salconi':'lusalconi','repas avion':null,
-  'pique-nique cala spalmatore':'calaspalmatore','café sur les bastioni':'algheroitalia',
-  'café corso umberto':'olbia','sebadas et pâtisseries':'sebadas','pasticceria pinna':'pasticceriapinna',
-  'mandras lentas, intra-muros':'mandraslentas','da gianni ou trattoria palau':'palausardegna',
-  'da robertino, palau':'palausardegna','da gianni, santa teresa':'santateresagallura',
-  'trattoria santa teresa':'santateresagallura','la lepanto, alghero':'algheroitalia',
-  'sa nassa / borgo sant\'ignazio (bosa)':'bosa','trattoria gallura, olbia':'trattoriagallura',
-  'déjeuner intra-muros':'algheroitalia','bombarde · fin d\'après-midi':'spiaggiadellebombarde',
-  'pittulongu (optionnel)':'pittulongu','spalmatore + bassa trinita':'calaspalmatore',
-  'rena di levante · li cossi':'licossi','porto liscia · 14h-16h45':'portoliscia',
-  'cane malu, bosa':'canemalu','b&b centre':'olbia',
-  'retour voiture':null,'pickup voiture alghero':'algheroitalia','contrôles olb':null,
-  'matinée libre alghero':'algheroitalia','déjeuner palau, port':'palausardegna',
-  'café avion':null,'petit-déj lu salconi':'lusalconi','vol retour':null,
-  'arrêt belvédère capo marargiu':'capomarargiu','bosa, sa costa et déjeuner':'bosa',
-  'cane malu → alghero':'algheroitalia','bosa → cane malu':'canemalu',
-  'centre → olb aéroport':'aeroportoolbia','olbia terranova → b&b centre':'olbia',
-  'gare alghero → loueur':'algheroitalia','spiaggia bombarde':'spiaggiadellebombarde'
+  'olb aéroport':'Aeroporto Olbia Costa Smeralda','olb':'Aeroporto Olbia Costa Smeralda','atterrissage olb':'Aeroporto Olbia Costa Smeralda',
+  'b&b + trattoria gallura':'Trattoria Gallura Olbia','centre intra-muros':'Alghero centro storico',
+  'sandwich dans le train':null,'apéritif lu salconi':'Lu Salconi Palau','repas avion':null,
+  'pique-nique cala spalmatore':'Cala Spalmatore La Maddalena','café sur les bastioni':'Bastioni Alghero',
+  'café corso umberto':'Corso Umberto Olbia','sebadas et pâtisseries':'Pasticceria Pinna Olbia','pasticceria pinna':'Pasticceria Pinna Olbia',
+  'mandras lentas, intra-muros':'Mandras Lentas Alghero','da gianni ou trattoria palau':'Palau Sardegna',
+  'da robertino, palau':'Da Robertino Palau','da gianni, santa teresa':'Da Gianni Santa Teresa Gallura',
+  'trattoria santa teresa':'Santa Teresa Gallura','la lepanto, alghero':'La Lepanto Alghero',
+  'sa nassa / borgo sant\'ignazio (bosa)':'Bosa Sardegna','trattoria gallura, olbia':'Trattoria Gallura Olbia',
+  'déjeuner intra-muros':'Alghero centro storico','bombarde · fin d\'après-midi':'Spiaggia delle Bombarde',
+  'pittulongu (optionnel)':'Spiaggia Pittulongu','spalmatore + bassa trinita':'Cala Spalmatore La Maddalena',
+  'rena di levante · li cossi':'Spiaggia Li Cossi Costa Paradiso','porto liscia · 14h-16h45':'Porto Liscia',
+  'cane malu, bosa':'Cane Malu Bosa','b&b centre':'Olbia centro',
+  'retour voiture':null,'pickup voiture alghero':'Alghero','contrôles olb':null,
+  'matinée libre alghero':'Alghero centro storico','déjeuner palau, port':'Palau Sardegna',
+  'café avion':null,'petit-déj lu salconi':'Lu Salconi Palau','vol retour':null,
+  'arrêt belvédère capo marargiu':'Capo Marargiu','bosa, sa costa et déjeuner':'Bosa Sa Costa',
+  'cane malu → alghero':'Alghero','bosa → cane malu':'Cane Malu Bosa',
+  'centre → olb aéroport':'Aeroporto Olbia Costa Smeralda','olbia terranova → b&b centre':'Olbia centro',
+  'gare alghero → loueur':'Alghero','spiaggia bombarde':'Spiaggia delle Bombarde'
 };
 const IG_STOPWORDS = new Set(['matin','midi','soir','baignade','dormir','—','-','sur','place']);
 
-function slugifyIG(text){
-  return text.normalize('NFD').replace(/[\̀-\ͯ]/g,'')
-    .replace(/[·,()].*/,'').replace(/→.*/,'')
-    .replace(/\s+\d{1,2}h.*/,'').trim().toLowerCase()
-    .replace(/[^a-z0-9]/g,'');
+function readableQueryFor(text){
+  let base = text;
+  if (text.includes('→')) base = text.split('→').pop();
+  return base.replace(/[·,()].*/,'').replace(/\s+\d{1,2}h.*/,'').trim();
 }
 
 function igTagFor(text){
@@ -455,22 +454,20 @@ function igTagFor(text){
   const norm = text.toLowerCase().trim();
   if (norm in IG_OVERRIDES) return IG_OVERRIDES[norm];
   if (IG_STOPWORDS.has(norm)) return null;
-  // Take destination if arrow
-  let base = text;
-  if (text.includes('→')) base = text.split('→').pop();
-  const slug = slugifyIG(base);
-  if (slug.length < 4 || slug.length > 30) return null;
-  if (/^(le|la|les|un|une|de|du|des|et|ou)$/.test(slug)) return null;
-  return slug;
+  const q = readableQueryFor(text);
+  if (q.length < 4 || q.length > 50) return null;
+  if (/^(le|la|les|un|une|de|du|des|et|ou)$/i.test(q)) return null;
+  return q;
 }
 
 function igHtml(text){
-  const tag = igTagFor(text);
-  if (!tag) return '';
-  return `<a class="ig-link" data-ig-tag="${tag}" href="https://www.instagram.com/explore/tags/${tag}/" target="_blank" rel="noopener" title="#${tag}">${IG_ICON}</a>`;
+  const q = igTagFor(text);
+  if (!q) return '';
+  const enc = encodeURIComponent(q);
+  return `<a class="ig-link" data-ig-q="${q.replace(/"/g,'&quot;')}" href="https://www.instagram.com/explore/search/keyword/?q=${enc}" target="_blank" rel="noopener" title="${q}">${IG_ICON}</a>`;
 }
 
-function openIgDrawer(tag){
+function openIgDrawer(q){
   let drawer = document.getElementById('ig-drawer');
   let overlay = document.getElementById('ig-overlay');
   if (!drawer){
@@ -482,14 +479,15 @@ function openIgDrawer(tag){
     drawer = document.createElement('aside');
     drawer.id = 'ig-drawer';
     drawer.className = 'ig-drawer';
-    drawer.innerHTML = `<header><span class="ig-title"><span id="ig-tag-name"></span></span><div class="ig-actions"><a id="ig-open-real" target="_blank" rel="noopener">Instagram ↗</a><button class="ig-close" aria-label="Fermer">×</button></div></header><iframe id="ig-frame" referrerpolicy="no-referrer"></iframe>`;
+    drawer.innerHTML = `<header><span class="ig-title" id="ig-tag-name"></span><div class="ig-actions"><a id="ig-open-real" target="_blank" rel="noopener">Instagram ↗</a><button class="ig-close" aria-label="Fermer">×</button></div></header><iframe id="ig-frame" referrerpolicy="no-referrer"></iframe>`;
     document.body.appendChild(drawer);
     drawer.querySelector('.ig-close').addEventListener('click', closeIgDrawer);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeIgDrawer(); });
   }
-  drawer.querySelector('#ig-tag-name').textContent = tag;
-  drawer.querySelector('#ig-open-real').href = `https://www.instagram.com/explore/tags/${tag}/`;
-  drawer.querySelector('#ig-frame').src = `https://www.bing.com/images/search?q=${encodeURIComponent(tag)}&form=HDRSC2`;
+  const enc = encodeURIComponent(q);
+  drawer.querySelector('#ig-tag-name').textContent = q;
+  drawer.querySelector('#ig-open-real').href = `https://www.instagram.com/explore/search/keyword/?q=${enc}`;
+  drawer.querySelector('#ig-frame').src = `https://www.bing.com/images/search?q=${enc}&form=HDRSC2`;
   drawer.classList.add('open');
   overlay.classList.add('open');
 }
@@ -504,7 +502,7 @@ document.addEventListener('click', e => {
   const link = e.target.closest('.ig-link');
   if (!link) return;
   e.preventDefault();
-  openIgDrawer(link.dataset.igTag);
+  openIgDrawer(link.dataset.igQ);
 });
 
 function injectDots(){
